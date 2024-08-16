@@ -1,0 +1,66 @@
+<TMPL_IF FORM_DEVICES>
+    <h1>Select Device</h1>
+    <form method="POST" action="link2home.cgi">
+        <p>Select Device:
+            <select name="device" onchange="this.form.submit()">
+                <option value="">-- Select Device --</option>
+                <tmpl_loop name="DEVICES">
+                    <option value="<tmpl_var name='DEVICE_NAME'>" <tmpl_var name='DEVICE_SELECTED'>>Device <tmpl_var name='DEVICE_NAME'></option>
+                </tmpl_loop>
+            </select>
+        </p>
+    </form>
+</TMPL_IF>
+
+<TMPL_IF name="MESSAGE">
+        <h2><tmpl_var name="MESSAGE"></h2>
+</TMPL_IF>
+
+<TMPL_IF FORM_UPDATE_DEVICE>
+
+    <h1>Update MAC Address</h1>
+    <form method="POST" action="link2home.cgi">
+        <!-- Ensure the selected device is passed -->
+        <input type="hidden" name="device" value="<tmpl_var name='DEVICE_NAME'>">
+        <p>MAC Address: <input type="text" name="mac_address" value="<tmpl_var name='MAC_ADDRESS'>" /></p>
+        <input type="submit" name="save" value="Save Configuration" />
+        <input type="submit" name="delete_device" value="Delete Device" />
+    </form>
+</TMPL_IF>
+
+<TMPL_IF FORM_ADD_DEVICE>
+
+    <h1>Add New Device</h1>
+    <form method="POST" action="link2home.cgi">
+        <p>Device Name: <input type="text" name="new_device_name" /></p>
+        <p>MAC Address: <input type="text" name="new_mac_address" /></p>
+        <input type="submit" name="add_device" value="Add Device" />
+    </form>
+</TMPL_IF>
+
+<TMPL_IF FORM_CONTROL_RELAY>
+
+    <h1>Control Relay</h1>
+    <form method="GET" action="link2home.cgi">
+        <p>Select Device:
+            <select name="device">
+                <tmpl_loop name="DEVICES">
+                    <option value="<tmpl_var name='DEVICE_NAME'>" <tmpl_var name='DEVICE_SELECTED'>>Device <tmpl_var name='DEVICE_NAME'></option>
+                </tmpl_loop>
+            </select>
+        </p>
+        <p>Select Relay:
+            <select name="relay">
+                <option value="1" <tmpl_if name='RELAY_1_SELECTED'>selected</tmpl_if>>Relay 1</option>
+                <option value="2" <tmpl_if name='RELAY_2_SELECTED'>selected</tmpl_if>>Relay 2</option>
+            </select>
+        </p>
+        <p>Select State:
+            <select name="state">
+                <option value="on" <tmpl_if name='STATE_ON_SELECTED'>selected</tmpl_if>>ON</option>
+                <option value="off" <tmpl_if name='STATE_OFF_SELECTED'>selected</tmpl_if>>OFF</option>
+            </select>
+        </p>
+        <input type="submit" value="Send Command" />
+    </form>
+<TMPL_IF>
