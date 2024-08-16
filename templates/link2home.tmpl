@@ -1,56 +1,93 @@
-    <h1>Select Device</h1>
-    <form method="POST">
-        <p>Select Device:
+<div role=\"main\" class=\"ui-content\">
+<div class=\"ui-body ui-body-a ui-corner-all loxberry-logo\">
+<div style=\"margin: 5%;\">
+
+    <div>
+    <TMPL_IF name="MESSAGE">
+        <p class="maininfo"><tmpl_var name="MESSAGE"></p>
+    </TMPL_IF>
+    </div>
+
+    <h2>Setup Device</h2>
+
+    
+    <form method="POST" class="separatingline">
+        <div class="ui-field-contain">
+            <label id="input_count_label">Select Device:</label>
+                 
             <select name="device" onchange="this.form.submit()">
                 <option value="">-- Select Device --</option>
                 <tmpl_loop name="DEVICES">
-                    <option value="<tmpl_var name='DEVICE_NAME'>" <tmpl_var name='DEVICE_SELECTED'>>Device <tmpl_var name='DEVICE_NAME'></option>
+                    <option value="<tmpl_var name='DEVICE_NAME'>" 
+                        <tmpl_var name='DEVICE_SELECTED'>><tmpl_var name='DEVICE_NAME'>    
+                    </option>
                 </tmpl_loop>
             </select>
-        </p>
+        </div>
     </form>
 
-<TMPL_IF name="MESSAGE">
-        <h2><tmpl_var name="MESSAGE"></h2>
-</TMPL_IF>
-
-    <h1>Update MAC Address</h1>
-    <form method="POST">
+    <form method="POST" class="separatingline">
         <!-- Ensure the selected device is passed -->
         <input type="hidden" name="device" value="<tmpl_var name='DEVICE_NAME'>">
-        <p>MAC Address: <input type="text" name="mac_address" value="<tmpl_var name='MAC_ADDRESS'>" /></p>
-        <input type="submit" name="save" value="Save Configuration" />
-        <input type="submit" name="delete_device" value="Delete Device" />
+         <div class="ui-field-contain">
+                <label id="input_count_label">MAC Address</label>
+                <input type="text" name="mac_address" value="<tmpl_var name='MAC_ADDRESS'>" />
+        </div>
+        <center>
+           
+            <input class="button" type="submit" name="save" value="Save Configuration" data-role="button" data-inline="true"
+                data-mini="true" />
+            <input class="button" type="submit" name="delete_device" value="Delete Device" data-role="button" data-inline="true"
+                data-mini="true" />
+        </center>
     </form>
 
-
-    <h1>Add New Device</h1>
-    <form method="POST">
-        <p>Device Name: <input type="text" name="new_device_name" /></p>
-        <p>MAC Address: <input type="text" name="new_mac_address" /></p>
-        <input type="submit" name="add_device" value="Add Device" />
+    <h2>Add new Device</h2>
+    
+    <form method="POST" class="separatingline">
+        <div class="ui-field-contain">
+            <label id="input_count_label">Device Name</label>
+                <input type="text" name="new_device_name" />
+        </div>
+        <div class="ui-field-contain">
+            <label id="input_count_label">MAC Address</label>
+                <input type="text" name="new_mac_address" />
+        </div>
+        <center>
+            <input class="button" type="submit" name="add_device" value="Add Device"  data-role="button" data-inline="true" data-mini="true" />
+        </center>
+            
     </form>
 
-    <h1>Control Relay</h1>
-    <form method="GET">
-        <p>Select Device:
+    <h2>Control Relay</h2>
+    <form method="GET" class="separatingline">
+         <div class="ui-field-contain">
+            <label id="input_count_label">Select Device</label>
             <select name="device">
                 <tmpl_loop name="DEVICES">
-                    <option value="<tmpl_var name='DEVICE_NAME'>" <tmpl_var name='DEVICE_SELECTED'>>Device <tmpl_var name='DEVICE_NAME'></option>
+                    <option value="<tmpl_var name='DEVICE_NAME'>" <tmpl_var name='DEVICE_SELECTED'>> <tmpl_var name='DEVICE_NAME'></option>
                 </tmpl_loop>
             </select>
-        </p>
-        <p>Select Relay:
+        </div>
+        <div class="ui-field-contain">
+            <label id="input_count_label">Select Relay</label>
             <select name="relay">
                 <option value="1" <tmpl_if name='RELAY_1_SELECTED'>selected</tmpl_if>>Relay 1</option>
                 <option value="2" <tmpl_if name='RELAY_2_SELECTED'>selected</tmpl_if>>Relay 2</option>
             </select>
-        </p>
-        <p>Select State:
+        </div>
+        <div class="ui-field-contain">
+            <label id="input_count_label">Select State</label>
             <select name="state">
                 <option value="on" <tmpl_if name='STATE_ON_SELECTED'>selected</tmpl_if>>ON</option>
                 <option value="off" <tmpl_if name='STATE_OFF_SELECTED'>selected</tmpl_if>>OFF</option>
             </select>
-        </p>
-        <input type="submit" value="Send Command" />
+        </div>
+        <center>
+            <input class="button" type="submit" value="Send Command"  data-role="button" data-inline="true"  data-mini="true" />
+        </center>
+        
     </form>
+</div>
+</div>
+</div>

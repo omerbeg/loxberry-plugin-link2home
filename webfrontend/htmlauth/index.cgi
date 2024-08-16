@@ -33,18 +33,13 @@ use HTML::Template;
 # Variables
 ##########################################################################
 
-my $log;
+my $log = LoxBerry::Log->new(name => 'CGI',);
+LOGSTART("Link2Home CGI Log");
+
 
 # Create a new CGI object
 my $cgi = CGI->new;
 my $q = $cgi->Vars;
-
-my $version = LoxBerry::System::pluginversion();
-my $template;
-
-# Wir Übergeben die Titelzeile (mit Versionsnummer), einen Link ins Wiki und das Hilfe-Template.
-# Um die Sprache der Hilfe brauchen wir uns im Code nicht weiter zu kümmern.
-LoxBerry::Web::lbheader("Loxberry Plugin for Link2Home V$version", "http://www.loxwiki.eu/", "help.html");
 
 # Language Phrases
 my %L;
@@ -53,16 +48,6 @@ my %L;
 my $config_file = $lbpconfigdir . "/config.ini";
 
 LOGSTART "Link2Home WebIf";
-
-# Init Template
-$template = HTML::Template->new(
-    filename => "$lbptemplatedir/link2home.tmpl", 
-    global_vars => 1,
-	loop_context_vars => 1,
-	die_on_bad_params => 0,
-	);
-
-%L = LoxBerry::System::readlanguage($template, "language.ini");
 
 # Print the form
 &form_print();
@@ -78,11 +63,24 @@ sub form_print
 	
 	# Navbar
 	our %navbar;
+    # Set header for our side
+    my $version = LoxBerry::System::pluginversion();
+    my $plugintitle = "Link2Home";
+    our $htmlhead = "<link rel='stylesheet' href='style.css'></link>";
 
 	# Template
-	LoxBerry::Web::lbheader($L{'COMMON.LABEL_PLUGINTITLE'} . " V$version", "https://www.loxwiki.eu/x/mA-L", "");
-	print $template->output();
-	LoxBerry::Web::lbfooter();
+
+    LoxBerry::Web::lbheader("$plugintitle $version", "https://www.loxwiki.eu/pages/viewpage.action?pageId=39355014", "help.html");
+
+    # Init Template
+    my $template = HTML::Template->new(
+        filename => "$lbptemplatedir/link2home.tmpl", 
+        global_vars => 1,
+        loop_context_vars => 1,
+        die_on_bad_params => 0,
+    );
+
+%L = LoxBerry::System::readlanguage($template, "language.ini");
 
     # Read current config values
     my %config = read_config($config_file);
@@ -210,63 +208,13 @@ sub form_print
 
     # Output the final HTML page
  #   print $cgi->header('text/html');
-     print $template->output;
+ #     print $template->output;
+ 
+    # Write template
+    print $template->output();
 
-
-
-
-	exit;
-
-}
-
-##########################################################################
-# Form: FORM_DEVICES 
-##########################################################################
-
-sub form_devices
-{
-	$template->param("FORM_DEVICES", 1);
-	return();
-}
-
-##########################################################################
-# Form: MESSAGE 
-##########################################################################
-
-sub form_message
-{
-	$template->param("MESSAGE", 1);
-	return();
-}
-
-##########################################################################
-# Form: FORM_UPDATE_DEVICE
-##########################################################################
-
-sub form_update_device
-{
-	$template->param("FORM_UPDATE_DEVICE", 1);
-	return();
-}
-
-##########################################################################
-# Form: FORM_ADD_DEVICE
-##########################################################################
-
-sub form_add_device
-{
-	$template->param("FORM_ADD_DEVICE", 1);
-	return();
-}
-
-##########################################################################
-# Form: FORM_CONTROL_RELAY
-##########################################################################
-
-sub form_control_relay
-{
-	$template->param("FORM_CONTROL_RELAY", 1);
-	return();
+    # set footer for our side
+    LoxBerry::Web::lbfooter();
 }
 
 # Read configuration
