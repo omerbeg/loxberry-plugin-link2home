@@ -47,6 +47,8 @@ my $version = LoxBerry::System::pluginversion();
 # Path to config.ini file and template file
 my $cfg = $lbpconfigdir . "/config.ini";
 
+# Read current config values
+my %config = read_config($cfg);
 
 # Create a logging object
 #my $log = LoxBerry::Log->new ( name => 'link2home' );
@@ -105,9 +107,6 @@ sub form_print
     
     # Set header for our side
     my $version = LoxBerry::System::pluginversion();
-
-    # Read current config values
-    my %config = read_config($cfg);
 
     # Populate the device dropdown in the form
     &device_loop();
@@ -285,18 +284,16 @@ exit;
 
 }
 
-sub device_loop(%config) {
+sub device_loop() {
 
     my @device_loop;
     # Read current config values
-    my %config = read_config($cfg);
-
-                foreach my $device (grep { $_ ne 'General' } keys %config) {
-                    push @device_loop, {
-                        DEVICE_NAME => $device,
-                        DEVICE_SELECTED => ($cgi->param('device') && $cgi->param('device') eq $device) ? 'selected' : ''
-                    };
-                }
+    foreach my $device (grep { $_ ne 'General' } keys %config) {
+        push @device_loop, {
+        DEVICE_NAME => $device,
+        DEVICE_SELECTED => ($cgi->param('device') && $cgi->param('device') eq $device) ? 'selected' : ''
+           };
+        }
     $template->param(DEVICES => \@device_loop);
 
 }
