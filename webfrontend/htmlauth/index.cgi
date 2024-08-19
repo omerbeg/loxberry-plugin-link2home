@@ -58,6 +58,7 @@ my $log = LoxBerry::Log->new (
         filename => "$lbslogdir/link2home.log",
         append => 1,
 );
+
 # We start the log. It will print and store some metadata like time, version numbers, and the string as log title 
 LOGSTART "Link2Home started";
   
@@ -78,12 +79,9 @@ my $template = HTML::Template->new(
  # Language Phrases
 my %L = LoxBerry::Web::readlanguage($template, "language.ini");
 
-LOGINF "Before form_print called";          
-
 # Print the form
 &form_print();
 
-LOGEND "End log";
 exit;
 
 ##########################################################################
@@ -115,9 +113,6 @@ sub form_print
     &device_loop();
 
     # If a device is selected, populate the form with the device's current config (MAC Address)
-    LOGINF "BEFORE SELECTED_DEVICE";
-    LOGINF "VARIABLE:" . Dumper($cgi->param('device'));
-    LOGINF Dumper(\%config);
     
     if (my $selected_device = $cgi->param('device')) {
         $template->param(MAC_ADDRESS => $config{$selected_device}{'MAC_ADDRESS'});
@@ -127,26 +122,6 @@ sub form_print
         $template->param(MAC_ADDRESS => '');
     }
     
-# Save Form 1 (Server Settings)
-if ($R::saveformdata1) {
-   	$template->param( FORMNO => '1' );
-   LOGINF "FORM1";
-}
-
-if ($R::saveformdata2) {
-   	$template->param( FORMNO => '2' );
-    LOGINF "FORM2";
-}
-
-if ($R::saveformdata3) {
-	$template->param( FORMNO => '3' );
-    LOGINF "FORM3";
-}
-
-
-
-LOGINF "R:" . Dumper(\$R::form);
-
 if ($R::form eq '3' || $R::saveformdata3) {
   $R::form = 3;
   $navbar{3}{active} = 1;
@@ -269,20 +244,11 @@ if ($R::form eq '3' || $R::saveformdata3) {
     $R::form = 1;
     $navbar{1}{active} = 1;
     $template->param("FORM1",1);
-    LOGINF "IN IF NOW !!!!!";
-    LOGINF "R:" . Dumper($R::form);
     my $broadcast_ip = $config{'General'}{'BROADCAST_IP'};
     my $port         = $config{'General'}{'PORT'};
     
     my $new_broadcast_ip = $cgi->param('broadcast_ip');
     my $new_port         = $cgi->param('port');
-
-    LOGINF "B:".$broadcast_ip;
-    LOGINF "P:".$port;
-
-    LOGINF "NB:".$new_broadcast_ip;
-    LOGINF "NP:".$new_port;
-
 
     $template->param(BROADCAST_IP => $broadcast_ip);
     $template->param(PORT => $port);
@@ -315,7 +281,6 @@ $template->param( "LBPPLUGINDIR", $lbpplugindir);
 LoxBerry::Web::lbheader($L{'COMMON.LABEL_PLUGINTITLE'} . " V$version", "http://www.loxwiki.eu/", "help.html");
 print $template->output();
 LoxBerry::Web::lbfooter();
-print "HERE END";
 exit;
 
 }
@@ -339,7 +304,7 @@ sub error
 {
 	$template->param( "ERROR", 1);
 	$template->param( "ERRORMESSAGE", $error);
-	LoxBerry::Web::lbheader($L{'COMMON.LABEL_PLUGINTITLE'} . " V$version", "http://www.loxwiki.eu/display/LOXBERRY/Weather4Loxone", "help.html");
+	LoxBerry::Web::lbheader($L{'COMMON.LABEL_PLUGINTITLE'} . " V$version", "http://www.loxwiki.eu/", "help.html");
 	print $template->output();
 	LoxBerry::Web::lbfooter();
 
