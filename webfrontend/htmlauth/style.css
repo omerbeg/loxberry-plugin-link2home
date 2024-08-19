@@ -1,103 +1,83 @@
-.error{
-	color: red;
-}
+        /* Basic styling for the navigation bar */
+        body {
+            font-family: Arial, sans-serif;
+        }
 
-.error .ui-input-text input {
-	border-color: red;
-	border-width: 2px;
-	border-style: solid;
-}
+        .navbar {
+            overflow: hidden;
+            background-color: #333;
+        }
 
-.maininfo{
-	text-align:center;
-	font-size: 1.3em;
-}
+        .navbar a {
+            float: left;
+            display: block;
+            color: #f2f2f2;
+            text-align: center;
+            padding: 14px 20px;
+            text-decoration: none;
+        }
 
-.info.maininfo{
-	color: green;
-}
+        .navbar a:hover {
+            background-color: #ddd;
+            color: black;
+        }
 
-.inputlabel{
-	text-align: right;
-}
+        .section {
+            display: none;
+            margin-top: 20px;
+        }
 
-.help {
-	font-size: 0.75em;
-    margin-top: 5px;
-}
+        .active {
+            display: block;
+        }
 
-.wiring {
-	float: right;
-  width: 45%;
-}
+        h1 {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
 
-.radiocontainer{
-	display: flex;
-  align-items: center;
-  justify-content: center;
-}
+        form {
+            margin-bottom: 20px;
+        }
 
-.gpioconf{
-  float: left;
-  margin: 0em 2% 0 0;
-}
-.mono{
-font-family: monospace;
-font-size: 110%;
-font-weight: bold;
-color: green;
-}
+        .separatingline {
+            border-bottom: 1px solid #ddd;
+            margin-bottom: 20px;
+            padding-bottom: 20px;
+        }
 
-.notityRedMqtt{
-	z-index: 10;
-	left: -44px;
-	top: 0px;
-	background: #ed1d24;
-	color: #fff;
-	padding: 6px;
-	border-radius: 11px;
-	font-size: 12px;
-	line-height: 0.8;
-	min-width: 9px;
-}
-.error_hint{
-	float: left;
-	margin-top: 0px;
-}
-.info_icon{
-	border: none;
-	background: none;
-	margin-top: 5px;
-}
-.info_text{
-	float: right;
-	margin-top: -10px;
-	margin-bottom: 0px;
-	height: 20px;
-}
+        .ui-field-contain {
+            margin-bottom: 10px;
+        }
 
-.ui-content>span.info_text_subline{
-	margin-top: 10px;
-	margin-bottom: 5px;
-}
-.info_text_headline{
-	font-weight: bold;
-	display: block;
-}
+        label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
 
-fieldset.gpio-right{
-	top: 55%;
-	transform: translateY(-45%);
-	position: -webkit-sticky;
-}
+        input[type="text"], select {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
 
-.param{
-	font-weight: bold;
-}
+        .button {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
 
-.button{
-	width: 300px;
-}
+        .button:hover {
+            background-color: #45a049;
+        }
 
-
-
+        .maininfo {
+            color: green;
+            text-align: center;
+        }

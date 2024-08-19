@@ -14,44 +14,76 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+
+##########################################################################
+# Modules
+##########################################################################
+
 use strict;
 use warnings;
-
-# Einbinden der LoxBerry-Module
-use CGI;
 use LoxBerry::System;
 use LoxBerry::Web;
 use LoxBerry::Log;
+use Data::Dumper;
+use CGI;
 
-# Einbinden der Netzwerk-, File- und Template-Module
+
 use IO::Socket::INET;
 use Socket;
-use File::Slurp;
 use HTML::Template;
 
 ##########################################################################
 # Variables
 ##########################################################################
 
-my $log = LoxBerry::Log->new(name => 'CGI',);
-LOGSTART("Link2Home CGI Log");
-
-
 # Create a new CGI object
 my $cgi = CGI->new;
+$cgi->import_names('R');
 my $q = $cgi->Vars;
 
-# Language Phrases
-my %L;
+# Version of this script
+my $version = LoxBerry::System::pluginversion();
 
 # Path to config.ini file and template file
-my $config_file = $lbpconfigdir . "/config.ini";
+my $cfg = $lbpconfigdir . "/config.ini";
 
-LOGSTART "Link2Home WebIf";
+
+# Create a logging object
+#my $log = LoxBerry::Log->new ( name => 'link2home' );
+# Create a logging object
+my $log = LoxBerry::Log->new ( 
+        name => 'link2home', 
+        package => 'Update',  
+        loglevel => 7,
+        filename => "$lbslogdir/link2home.log",
+        append => 1,
+);
+# We start the log. It will print and store some metadata like time, version numbers, and the string as log title 
+LOGSTART "Link2Home started";
+  
+#########################################################################
+# Parameter
+#########################################################################
+
+my $error;
+
+# Init Template
+my $template = HTML::Template->new(
+    filename => "$lbptemplatedir/link2home.tmpl", 
+    global_vars => 1,
+    loop_context_vars => 1,
+    die_on_bad_params => 0,
+);
+
+ # Language Phrases
+my %L = LoxBerry::Web::readlanguage($template, "language.ini");
+
+LOGINF "Before form_print called";          
 
 # Print the form
 &form_print();
 
+LOGEND "End log";
 exit;
 
 ##########################################################################
@@ -61,89 +93,64 @@ exit;
 sub form_print
 {
 	
-	# Navbar
-	our %navbar;
+    
+    # Navbar
+    our %navbar;
+	$navbar{1}{Name} = "$L{'SETTINGS.LABEL_GENERAL_SETTINGS'}";
+	$navbar{1}{URL} = 'index.cgi?form=1';
+
+    $navbar{2}{Name} = "$L{'SETTINGS.LABEL_DEVICE_MANAGEMENT'}";
+    $navbar{2}{URL} = 'index.cgi?form=2';
+
+    $navbar{3}{Name} = "$L{'SETTINGS.LABEL_RELAY_CONTROL'}";
+    $navbar{3}{URL} = 'index.cgi?form=3';
+    
     # Set header for our side
     my $version = LoxBerry::System::pluginversion();
-    my $plugintitle = "Link2Home";
-    our $htmlhead = "<link rel='stylesheet' href='style.css'></link>";
-
-	# Template
-
-    LoxBerry::Web::lbheader("$plugintitle $version", "https://www.loxwiki.eu/pages/viewpage.action?pageId=39355014", "help.html");
-
-    # Init Template
-    my $template = HTML::Template->new(
-        filename => "$lbptemplatedir/link2home.tmpl", 
-        global_vars => 1,
-        loop_context_vars => 1,
-        die_on_bad_params => 0,
-    );
-
-%L = LoxBerry::System::readlanguage($template, "language.ini");
 
     # Read current config values
-    my %config = read_config($config_file);
+    my %config = read_config($cfg);
 
-    # Handle form submission to save new config (updates or adds devices)
-    if ($cgi->param('save')) {
-        my $selected_device = $cgi->param('device');
-        my $mac_address = $cgi->param('mac_address');
+    # Populate the device dropdown in the form
+    &device_loop();
 
-        if ($selected_device && $mac_address) {
-            # Add or update the device configuration
-            $config{$selected_device}{'MAC_ADDRESS'} = $mac_address;
-
-            # Save the new configuration values to config.ini
-            write_config($config_file, \%config);
-
-            $template->param(MESSAGE => "Configuration for $selected_device saved successfully!");
-        } else {
-            # Handle missing fields (device or mac_address not set)
-            $template->param(MESSAGE => "Error: All fields are required!");
-        }
+    # If a device is selected, populate the form with the device's current config (MAC Address)
+    LOGINF "BEFORE SELECTED_DEVICE";
+    LOGINF "VARIABLE:" . Dumper($cgi->param('device'));
+    LOGINF Dumper(\%config);
+    
+    if (my $selected_device = $cgi->param('device')) {
+        $template->param(MAC_ADDRESS => $config{$selected_device}{'MAC_ADDRESS'});
+        $template->param(DEVICE_NAME => $selected_device);
+    } else {
+        # Default values if no device is selected yet
+        $template->param(MAC_ADDRESS => '');
     }
+    
+# Save Form 1 (Server Settings)
+if ($R::saveformdata1) {
+   	$template->param( FORMNO => '1' );
+   LOGINF "FORM1";
+}
 
-    # Handle form submission to add a new device
-    if ($cgi->param('add_device')) {
-        my $new_device_name = $cgi->param('new_device_name');
-        my $new_mac_address = $cgi->param('new_mac_address');
+if ($R::saveformdata2) {
+   	$template->param( FORMNO => '2' );
+    LOGINF "FORM2";
+}
 
-        if ($new_device_name && $new_mac_address) {
-            # Check if the device already exists
-            if (exists $config{$new_device_name}) {
-                $template->param(MESSAGE => "Error: Device $new_device_name already exists!");
-            } else {
-                # Add the new device to the config
-                $config{$new_device_name}{'MAC_ADDRESS'} = $new_mac_address;
+if ($R::saveformdata3) {
+	$template->param( FORMNO => '3' );
+    LOGINF "FORM3";
+}
 
-                # Save the updated configuration
-                write_config($config_file, \%config);
 
-                $template->param(MESSAGE => "New device $new_device_name added successfully!");
-            }
-        } else {
-            $template->param(MESSAGE => "Error: Device name and MAC address are required!");
-        }
-    }
 
-    # Handle device deletion
-    if ($cgi->param('delete_device')) {
-        my $device_to_delete = $cgi->param('device');
+LOGINF "R:" . Dumper(\$R::form);
 
-        if ($device_to_delete && exists $config{$device_to_delete}) {
-            # Remove the device from the config
-            delete $config{$device_to_delete};
-
-            # Save the updated configuration
-            write_config($config_file, \%config);
-
-            $template->param(MESSAGE => "Device $device_to_delete has been deleted successfully!");
-        } else {
-            $template->param(MESSAGE => "Error: Device $device_to_delete does not exist!");
-        }
-    }
-
+if ($R::form eq '3' || $R::saveformdata3) {
+  $R::form = 3;
+  $navbar{3}{active} = 1;
+  $template->param( "FORM3", 1);
     # Handle relay control form submission
     if ($cgi->param('relay') && $cgi->param('state') && $cgi->param('device')) {
         my $relay = $cgi->param('relay');
@@ -187,36 +194,157 @@ sub form_print
         $template->param("STATE_" . uc($state) . "_SELECTED" => 1);
     }
 
-    # Populate the device dropdown in the form
-    my @device_loop;
-    foreach my $device (grep { $_ ne 'General' } keys %config) {
-        push @device_loop, {
-            DEVICE_NAME => $device,
-            DEVICE_SELECTED => ($cgi->param('device') && $cgi->param('device') eq $device) ? 'selected' : ''
-        };
+} elsif ($R::form eq '2' || $R::saveformdata2) {
+    $R::form = 2;
+    $navbar{2}{active} = 1;
+    $template->param("FORM2",1);
+
+    # Handle form submission to add a new device
+    if ($cgi->param('add_device')) {
+        my $new_device_name = $cgi->param('new_device_name');
+        my $new_mac_address = $cgi->param('new_mac_address');
+
+        if ($new_device_name && $new_mac_address) {
+            # Check if the device already exists
+            if (exists $config{$new_device_name}) {
+                $template->param(MESSAGE => "Error: Device $new_device_name already exists!");
+            } else {
+                # Add the new device to the config
+                $config{$new_device_name}{'MAC_ADDRESS'} = $new_mac_address;
+
+                # Save the updated configuration
+                write_config($cfg, \%config);
+
+                $template->param(MESSAGE => "New device $new_device_name added successfully!");
+                &device_loop();              
+            }
+        } else {
+            $template->param(MESSAGE => "Error: Device name and MAC address are required!");
+        }
     }
-    $template->param(DEVICES => \@device_loop);
 
-    # If a device is selected, populate the form with the device's current config (MAC Address)
-    if (my $selected_device = $cgi->param('device')) {
-        $template->param(MAC_ADDRESS => $config{$selected_device}{'MAC_ADDRESS'});
-        $template->param(DEVICE_NAME => $selected_device);
-    } else {
-        # Default values if no device is selected yet
-        $template->param(MAC_ADDRESS => '');
+    # Handle device deletion
+    if ($cgi->param('delete_device')) {
+        my $device_to_delete = $cgi->param('device');
+
+        if ($device_to_delete && exists $config{$device_to_delete}) {
+            # Remove the device from the config
+            delete $config{$device_to_delete};
+
+            # Save the updated configuration
+            write_config($cfg, \%config);
+
+            $template->param(MESSAGE => "Device $device_to_delete has been deleted successfully!");
+            $template->param(MAC_ADDRESS => '');
+
+            &device_loop();
+    
+        } else {
+            $template->param(MESSAGE => "Error: Device $device_to_delete does not exist!");
+        }
     }
 
-    # Output the final HTML page
- #   print $cgi->header('text/html');
- #     print $template->output;
- 
-    # Write template
-    print $template->output();
+    # Handle form submission to save new config (updates or adds devices)
+    if ($cgi->param('save_device')) {
+        my $selected_device = $cgi->param('device');
+        my $mac_address = $cgi->param('mac_address');
 
-    # set footer for our side
-    LoxBerry::Web::lbfooter();
+        if ($selected_device && $mac_address) {
+            # Add or update the device configuration
+            $config{$selected_device}{'MAC_ADDRESS'} = $mac_address;
+
+            # Save the new configuration values to config.ini
+            write_config($cfg, \%config);
+
+            $template->param(MESSAGE => "Configuration for $selected_device saved successfully!");
+            $template->param(MAC_ADDRESS => $config{$selected_device}{'MAC_ADDRESS'});
+            
+        } else {
+            # Handle missing fields (device or mac_address not set)
+            $template->param(MESSAGE => "Error: All fields are required!");
+        }
+    }
+
+} elsif ($R::form eq '1' || $R::saveformdata1 || !$R::form) {
+    $R::form = 1;
+    $navbar{1}{active} = 1;
+    $template->param("FORM1",1);
+    LOGINF "IN IF NOW !!!!!";
+    LOGINF "R:" . Dumper($R::form);
+    my $broadcast_ip = $config{'General'}{'BROADCAST_IP'};
+    my $port         = $config{'General'}{'PORT'};
+    
+    my $new_broadcast_ip = $cgi->param('broadcast_ip');
+    my $new_port         = $cgi->param('port');
+
+    LOGINF "B:".$broadcast_ip;
+    LOGINF "P:".$port;
+
+    LOGINF "NB:".$new_broadcast_ip;
+    LOGINF "NP:".$new_port;
+
+
+    $template->param(BROADCAST_IP => $broadcast_ip);
+    $template->param(PORT => $port);
+    
+
+    if ($cgi->param('save_general')) {
+        if ($new_broadcast_ip && $new_port) {
+            $config{'General'}{'BROADCAST_IP'}=$new_broadcast_ip;
+            $config{'General'}{'PORT'}=$port;
+            # Save the updated configuration
+            write_config($cfg, \%config);
+            
+            $template->param(BROADCAST_IP => $new_broadcast_ip);
+            $template->param(PORT => $new_port);
+            $template->param(MESSAGE => "New general settings saved successfully!");
+                    
+        }  else {
+            $template->param(MESSAGE => "Error: Broacast IP and Port are required!");
+        }
+    }
+
+} elsif (!$R::form ) {
+    $R::form = '1'; 
 }
 
+# Template Vars and Form parts
+$template->param( "LBPPLUGINDIR", $lbpplugindir);
+
+# Template
+LoxBerry::Web::lbheader($L{'COMMON.LABEL_PLUGINTITLE'} . " V$version", "http://www.loxwiki.eu/", "help.html");
+print $template->output();
+LoxBerry::Web::lbfooter();
+print "HERE END";
+exit;
+
+}
+
+sub device_loop(%config) {
+
+    my @device_loop;
+    # Read current config values
+    my %config = read_config($cfg);
+
+                foreach my $device (grep { $_ ne 'General' } keys %config) {
+                    push @device_loop, {
+                        DEVICE_NAME => $device,
+                        DEVICE_SELECTED => ($cgi->param('device') && $cgi->param('device') eq $device) ? 'selected' : ''
+                    };
+                }
+    $template->param(DEVICES => \@device_loop);
+
+}
+sub error
+{
+	$template->param( "ERROR", 1);
+	$template->param( "ERRORMESSAGE", $error);
+	LoxBerry::Web::lbheader($L{'COMMON.LABEL_PLUGINTITLE'} . " V$version", "http://www.loxwiki.eu/display/LOXBERRY/Weather4Loxone", "help.html");
+	print $template->output();
+	LoxBerry::Web::lbfooter();
+
+	exit;
+}
 # Read configuration
 sub read_config {
     my ($filename) = @_;
