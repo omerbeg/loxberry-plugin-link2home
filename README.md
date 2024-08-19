@@ -44,4 +44,4 @@ Contributions to these scripts are welcome, especially in areas such as error ha
 
 ## License
 
-This script is released under the GNU GENERAL PUBLIC LICENSE. See `LICENSE` file for more details.
+This script is released under the Apache LICENSE. See `LICENSE` file for more details.
