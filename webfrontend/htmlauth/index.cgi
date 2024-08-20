@@ -277,7 +277,7 @@ if ($R::form eq '3' || $R::saveformdata3) {
 $template->param( "LBPPLUGINDIR", $lbpplugindir);
 
 # Template
-LoxBerry::Web::lbheader($L{'COMMON.LABEL_PLUGINTITLE'} . " V$version", "http://www.loxwiki.eu/", "help.html");
+LoxBerry::Web::lbheader($L{'COMMON.LABEL_PLUGINTITLE'} . " V$version", "https://wiki.loxberry.de/plugins/link2home/", "help.html");
 print $template->output();
 LoxBerry::Web::lbfooter();
 exit;
@@ -301,7 +301,7 @@ sub error
 {
 	$template->param( "ERROR", 1);
 	$template->param( "ERRORMESSAGE", $error);
-	LoxBerry::Web::lbheader($L{'COMMON.LABEL_PLUGINTITLE'} . " V$version", "http://www.loxwiki.eu/", "help.html");
+	LoxBerry::Web::lbheader($L{'COMMON.LABEL_PLUGINTITLE'} . " V$version", "https://wiki.loxberry.de/plugins/link2home/", "help.html");
 	print $template->output();
 	LoxBerry::Web::lbfooter();
 
