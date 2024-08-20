@@ -96,8 +96,8 @@ sub form_print
     
     # Navbar
     our %navbar;
-	$navbar{1}{Name} = "$L{'SETTINGS.LABEL_GENERAL_SETTINGS'}";
-	$navbar{1}{URL} = 'index.cgi?form=1';
+    $navbar{1}{Name} = "$L{'SETTINGS.LABEL_GENERAL_SETTINGS'}";
+    $navbar{1}{URL} = 'index.cgi?form=1';
 
     $navbar{2}{Name} = "$L{'SETTINGS.LABEL_DEVICE_MANAGEMENT'}";
     $navbar{2}{URL} = 'index.cgi?form=2';
