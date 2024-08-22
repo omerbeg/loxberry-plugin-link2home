@@ -21,7 +21,7 @@
                     <input type="text" name="port" value="<tmpl_var name='PORT'>" />
                 </div>
                 <center>
-                    <input class="button" type="submit" name="save_general" value="Save General Configuration" data-role="button" data-inline="true" data-mini="true" />
+                    <input class="button" type="submit" name="save_general" value="<TMPL_VAR SETTINGS.LABEL_SAVE_GENERAL_SETTINGS>" data-role="button" data-inline="true" data-mini="true" />
                 </center>
             </form>
         </div>
@@ -35,9 +35,9 @@
             <form method="POST" class="separatingline">
             <input type="hidden" name="saveformdata2" value="2">
                 <div class="ui-field-contain">
-                    <label>Select Device:</label>
+                    <label><TMPL_VAR SETTINGS.LABEL_SELECT_DEVICE></label>
                     <select name="device" onchange="this.form.submit()">
-                        <option value="">-- Select Device --</option>
+                        <option value=""><TMPL_VAR SETTINGS.LABEL_SELECT_DEVICE></option>
                         <tmpl_loop name="DEVICES">
                             <option value="<tmpl_var name='DEVICE_NAME'>" <tmpl_var name='DEVICE_SELECTED'>><tmpl_var name='DEVICE_NAME'></option>
                         </tmpl_loop>
@@ -50,12 +50,12 @@
                 <input type="hidden" name="device" value="<tmpl_var name='DEVICE_NAME'>">
                 <input type="hidden" name="saveformdata2" value="2">
                 <div class="ui-field-contain">
-                    <label>MAC Address</label>
+                    <label><TMPL_VAR SETTINGS.LABEL_MAC_ADDRESS></label>
                     <input type="text" name="mac_address" value="<tmpl_var name='MAC_ADDRESS'>" />
                 </div>
                 <center>
-                    <input class="button" type="submit" name="save_device" value="Save Configuration" data-role="button" data-inline="true" data-mini="true" />
-                    <input class="button" type="submit" name="delete_device" value="Delete Device" data-role="button" data-inline="true" data-mini="true" />
+                    <input class="button" type="submit" name="save_device" value="<TMPL_VAR SETTINGS.LABEL_SAVE_CONFIGURATION>" data-role="button" data-inline="true" data-mini="true" />
+                    <input class="button" type="submit" name="delete_device" value="<TMPL_VAR SETTINGS.LABEL_DELETE_DEVICE>" data-role="button" data-inline="true" data-mini="true" />
                 </center>
             </form>
 
@@ -64,15 +64,15 @@
             <form method="POST" class="separatingline">
                 <input type="hidden" name="saveformdata2" value="2">
                 <div class="ui-field-contain">
-                    <label>Device Name</label>
+                    <label><TMPL_VAR SETTINGS.LABEL_DEVICE_NAME></label>
                     <input type="text" name="new_device_name" />
                 </div>
                 <div class="ui-field-contain">
-                    <label>MAC Address</label>
+                    <label><TMPL_VAR SETTINGS.LABEL_MAC_ADDRESS></label>
                     <input type="text" name="new_mac_address" />
                 </div>
                 <center>
-                    <input class="button" type="submit" name="add_device" value="Add Device" data-role="button" data-inline="true" data-mini="true" />
+                    <input class="button" type="submit" name="add_device" value="<TMPL_VAR SETTINGS.LABEL_ADD_DEVICE>" data-role="button" data-inline="true" data-mini="true" />
                 </center>
             </form>
         </div>
@@ -84,7 +84,7 @@
             <form method="GET" class="separatingline">
             <input type="hidden" name="saveformdata3" value="3">
                 <div class="ui-field-contain">
-                    <label>Select Device</label>
+                    <label><TMPL_VAR SETTINGS.LABEL_SELECT_DEVICE></label>
                     <select name="device">
                         <tmpl_loop name="DEVICES">
                             <option value="<tmpl_var name='DEVICE_NAME'>" <tmpl_var name='DEVICE_SELECTED'>><tmpl_var name='DEVICE_NAME'></option>
@@ -92,7 +92,7 @@
                     </select>
                 </div>
                 <div class="ui-field-contain">
-                    <label>Select Relay</label>
+                    <label><TMPL_VAR SETTINGS.LABEL_SELECT_RELAY></label>
                     <select name="relay">
                         <option value="1" <tmpl_if name='RELAY_1_SELECTED'>selected</tmpl_if>>Relay 1</option>
                         <option value="2" <tmpl_if name='RELAY_2_SELECTED'>selected</tmpl_if>>Relay 2</option>
@@ -106,7 +106,7 @@
                     </select>
                 </div>
                 <center>
-                    <input class="button" type="submit" value="Send Command" data-role="button" data-inline="true" data-mini="true" />
+                    <input class="button" type="submit" value="<TMPL_VAR SETTINGS.LABEL_SEND_COMMAND>" data-role="button" data-inline="true" data-mini="true" />
                 </center>
             </form>
         </div>
