@@ -9,7 +9,7 @@
 <TMPL_IF FORM1>
         <!-- General Configuration Section -->
         <div id="general">
-            <h1>General Configuration</h1>
+            <h1><TMPL_VAR SETTINGS.LABEL_GENERAL_SETTINGS></h1>
             <form method="POST" class="separatingline">
                 <input type="hidden" name="saveformdata1" value="1">
                 <div class="ui-field-contain">
@@ -29,7 +29,7 @@
 <TMPL_IF FORM2>
         <!-- Device Management Section -->
         <div id="device_management">
-            <h1>Device Management</h1>
+            <h1><TMPL_VAR SETTINGS.LABEL_DEVICE_MANAGEMENT></h1>
 
             <!-- Select Device -->
             <form method="POST" class="separatingline">
@@ -60,7 +60,7 @@
             </form>
 
             <!-- Add New Device -->
-            <h2>Add New Device</h2>
+            <h2><TMPL_VAR SETTINGS.LABEL_ADD_NEW_DEVICE></h2>
             <form method="POST" class="separatingline">
                 <input type="hidden" name="saveformdata2" value="2">
                 <div class="ui-field-contain">
@@ -80,7 +80,7 @@
 <TMPL_IF FORM3>
         <!-- Relay Control Section -->
         <div id="relay_control">
-            <h1>Control Relay</h1>
+            <h1><TMPL_VAR SETTINGS.LABEL_CONTROL_RELAY></h1>
             <form method="GET" class="separatingline">
             <input type="hidden" name="saveformdata3" value="3">
                 <div class="ui-field-contain">
