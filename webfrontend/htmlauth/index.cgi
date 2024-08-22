@@ -159,9 +159,12 @@ if ($R::form eq '3' || $R::saveformdata3) {
             $sock->send($message, 0, $sockaddr) or die "Send error: $!\n";
             $sock->close();
 
-            $template->param(MESSAGE => "Command sent to relay $relay of $selected_device: " . ($state eq 'on' ? 'ON' : 'OFF'));
+            my $message = "$L{'SETTINGS.LABEL_COMMAND_SENT'}" . " " . $relay . " $L{'SETTINGS.LABEL_OF'}". " $selected_device: " . ($state eq 'on' ? "$L{'SETTINGS.LABEL_ON'}" : "$L{'SETTINGS.LABEL_OFF'}");
+            $template->param(MESSAGE => $message);
+
         } else {
-            $template->param(MESSAGE => "Error: Invalid relay or state parameters.");
+            my $message =  "$L{'SETTINGS.LABEL_ERROR_INVALID_RELAY_PARAM'}";
+            $template->param(MESSAGE => $message);
         }
 
         $template->param("RELAY_${relay}_SELECTED" => 1);
@@ -181,7 +184,8 @@ if ($R::form eq '3' || $R::saveformdata3) {
         if ($new_device_name && $new_mac_address) {
             # Check if the device already exists
             if (exists $config{$new_device_name}) {
-                $template->param(MESSAGE => "Error: Device $new_device_name already exists!");
+                my $message= "$L{'SETTINGS.LABEL_ERROR_DEVICE'}". " " . $new_device_name. " " . "$L{'SETTINGS.LABEL_ALREADY_EXISTS'}";
+                $template->param(MESSAGE => $message);
             } else {
                 # Add the new device to the config
                 $config{$new_device_name}{'MAC_ADDRESS'} = $new_mac_address;
@@ -189,11 +193,14 @@ if ($R::form eq '3' || $R::saveformdata3) {
                 # Save the updated configuration
                 write_config($cfg, \%config);
 
-                $template->param(MESSAGE => "New device $new_device_name added successfully!");
+                my $message= "$L{'SETTINGS.LABEL_NEW_DEVICE'}" . " ". $new_device_name . " " . "$L{'SETTINGS.LABEL_ADDED_SUCCESSFULLY'}";
+
+                $template->param(MESSAGE => $message);
                 &device_loop();              
             }
         } else {
-            $template->param(MESSAGE => "Error: Device name and MAC address are required!");
+            my $message= "$L{'SETTINGS.LABEL_ERROR_NAME_MAC_REQUIERED'}";
+            $template->param(MESSAGE => $message);
         }
     }
 
@@ -208,13 +215,15 @@ if ($R::form eq '3' || $R::saveformdata3) {
             # Save the updated configuration
             write_config($cfg, \%config);
 
-            $template->param(MESSAGE => "Device $device_to_delete has been deleted successfully!");
+            my $message="$L{'SETTINGS.LABEL_DEVICE'}". " ".$device_to_delete . " ". "$L{'SETTINGS.LABEL_DELETED_SUCCESSFULLY'}";;
+            $template->param(MESSAGE => $message);
             $template->param(MAC_ADDRESS => '');
 
             &device_loop();
     
         } else {
-            $template->param(MESSAGE => "Error: Device $device_to_delete does not exist!");
+            my $message="$L{'SETTINGS.LABEL_ERROR_DEVICE_NAME'}". " " . $device_to_delete. " " . "$L{'SETTINGS.LABEL_DOESNOT_EXISTS'}";
+            $template->param(MESSAGE => $message);
         }
     }
 
@@ -230,12 +239,15 @@ if ($R::form eq '3' || $R::saveformdata3) {
             # Save the new configuration values to config.ini
             write_config($cfg, \%config);
 
-            $template->param(MESSAGE => "Configuration for $selected_device saved successfully!");
+            my $message = "$L{'SETTINGS.LABEL_CONFIGURATION_FOR'}". " " . $selected_device. " "."$L{'SETTINGS.LABEL_SAVED_SUCCESSFULLY'}";
+
+            $template->param(MESSAGE => $message);
             $template->param(MAC_ADDRESS => $config{$selected_device}{'MAC_ADDRESS'});
             
         } else {
             # Handle missing fields (device or mac_address not set)
-            $template->param(MESSAGE => "Error: All fields are required!");
+            my $message="$L{'SETTINGS.LABEL_ERROR_ALL_FIELD_REQUIRED'}";
+            $template->param(MESSAGE => $message);
         }
     }
 
@@ -262,10 +274,12 @@ if ($R::form eq '3' || $R::saveformdata3) {
             
             $template->param(BROADCAST_IP => $new_broadcast_ip);
             $template->param(PORT => $new_port);
-            $template->param(MESSAGE => "New general settings saved successfully!");
+            my $message = "$L{'SETTINGS.LABEL_GENERAL_SETTINGS_SAVED'}";
+            $template->param(MESSAGE => $message);
                     
         }  else {
-            $template->param(MESSAGE => "Error: Broacast IP and Port are required!");
+            my $message="$L{'SETTINGS.ERROR_BROADCAST_PORT_REQUIERED'}";
+            $template->param(MESSAGE => $message);
         }
     }
 
