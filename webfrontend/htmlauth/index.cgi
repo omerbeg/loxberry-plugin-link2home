@@ -25,6 +25,7 @@ use LoxBerry::System;
 use LoxBerry::Web;
 use LoxBerry::Log;
 use Data::Dumper;
+use Config::Simple;
 use CGI;
 
 
@@ -48,7 +49,10 @@ my $version = LoxBerry::System::pluginversion();
 my $cfg = $lbpconfigdir . "/config.ini";
 
 # Read current config values
-my %config = read_config($cfg);
+#my %config = read_config($cfg);
+my $config;
+
+$config = new Config::Simple($cfg) or die $config->error();
 
 # Create a logging object
 #my $log = LoxBerry::Log->new ( name => 'link2home' );
@@ -114,7 +118,8 @@ sub form_print
     # If a device is selected, populate the form with the device's current config (MAC Address)
     
     if (my $selected_device = $cgi->param('device')) {
-        $template->param(MAC_ADDRESS => $config{$selected_device}{'MAC_ADDRESS'});
+        my $value=$selected_device.".MAC_ADDRESS";
+        $template->param(MAC_ADDRESS => $config->param($value));
         $template->param(DEVICE_NAME => $selected_device);
     } else {
         # Default values if no device is selected yet
@@ -149,12 +154,13 @@ if ($R::form eq '3' || $R::saveformdata3) {
             ) or die "Could not create socket: $!\n";
 
             # Prepare the command using the MAC address of the selected device
-            my $command = $COMMAND_PREFIX . $config{$selected_device}{'MAC_ADDRESS'} . $COMMAND_SUFFIX{$relay} . $STATE_CODES{$state};
+            my $value=$selected_device.".MAC_ADDRESS";
+            my $command = $COMMAND_PREFIX . $config->param($value) . $COMMAND_SUFFIX{$relay} . $STATE_CODES{$state};
             my $message = pack("H*", $command);
 
             # Use the global BROADCAST_IP and PORT
-            my $iaddr = inet_aton($config{'General'}{'BROADCAST_IP'}) or die "Invalid IP address: $config{'General'}{'BROADCAST_IP'}\n";
-            my $sockaddr = sockaddr_in($config{'General'}{'PORT'}, $iaddr);
+            my $iaddr = inet_aton($config->param("General.BROADCAST_IP")) or die "Invalid IP address: " . $config->param("General.BROADCAST_IP") ."\n";
+            my $sockaddr = sockaddr_in($config->param("General.PORT"), $iaddr);
 
             $sock->send($message, 0, $sockaddr) or die "Send error: $!\n";
             $sock->close();
@@ -183,15 +189,16 @@ if ($R::form eq '3' || $R::saveformdata3) {
 
         if ($new_device_name && $new_mac_address) {
             # Check if the device already exists
-            if (exists $config{$new_device_name}) {
+            if ($config->param("$new_device_name")) {
                 my $message= "$L{'SETTINGS.LABEL_ERROR_DEVICE'}". " " . $new_device_name. " " . "$L{'SETTINGS.LABEL_ALREADY_EXISTS'}";
                 $template->param(MESSAGE => $message);
             } else {
                 # Add the new device to the config
-                $config{$new_device_name}{'MAC_ADDRESS'} = $new_mac_address;
+                my $value=$new_device_name.".MAC_ADDRESS";
+                $config->param($value, $new_mac_address);
 
                 # Save the updated configuration
-                write_config($cfg, \%config);
+                $config->save;
 
                 my $message= "$L{'SETTINGS.LABEL_NEW_DEVICE'}" . " ". $new_device_name . " " . "$L{'SETTINGS.LABEL_ADDED_SUCCESSFULLY'}";
 
@@ -207,13 +214,14 @@ if ($R::form eq '3' || $R::saveformdata3) {
     # Handle device deletion
     if ($cgi->param('delete_device')) {
         my $device_to_delete = $cgi->param('device');
-
-        if ($device_to_delete && exists $config{$device_to_delete}) {
+        my $value=$device_to_delete.".MAC_ADDRESS";
+            
+        if ($device_to_delete && $config->param($value)) {
             # Remove the device from the config
-            delete $config{$device_to_delete};
+            delete_block($device_to_delete);
 
             # Save the updated configuration
-            write_config($cfg, \%config);
+            $config->save;
 
             my $message="$L{'SETTINGS.LABEL_DEVICE'}". " ".$device_to_delete . " ". "$L{'SETTINGS.LABEL_DELETED_SUCCESSFULLY'}";;
             $template->param(MESSAGE => $message);
@@ -234,15 +242,18 @@ if ($R::form eq '3' || $R::saveformdata3) {
 
         if ($selected_device && $mac_address) {
             # Add or update the device configuration
-            $config{$selected_device}{'MAC_ADDRESS'} = $mac_address;
+            #$config{$selected_device}{'MAC_ADDRESS'} = $mac_address;
+            my $value=$selected_device.".MAC_ADDRESS";
+            $config->param($value, $mac_address);
 
             # Save the new configuration values to config.ini
-            write_config($cfg, \%config);
+            #write_config($cfg, \%config);
+            $config->save;
 
             my $message = "$L{'SETTINGS.LABEL_CONFIGURATION_FOR'}". " " . $selected_device. " "."$L{'SETTINGS.LABEL_SAVED_SUCCESSFULLY'}";
 
             $template->param(MESSAGE => $message);
-            $template->param(MAC_ADDRESS => $config{$selected_device}{'MAC_ADDRESS'});
+            $template->param(MAC_ADDRESS => $config->param($value));
             
         } else {
             # Handle missing fields (device or mac_address not set)
@@ -255,8 +266,8 @@ if ($R::form eq '3' || $R::saveformdata3) {
     $R::form = 1;
     $navbar{1}{active} = 1;
     $template->param("FORM1",1);
-    my $broadcast_ip = $config{'General'}{'BROADCAST_IP'};
-    my $port         = $config{'General'}{'PORT'};
+    my $broadcast_ip = $config->param("General.BROADCAST_IP");
+    my $port         = $config->param("General.PORT");
     
     my $new_broadcast_ip = $cgi->param('broadcast_ip');
     my $new_port         = $cgi->param('port');
@@ -267,11 +278,12 @@ if ($R::form eq '3' || $R::saveformdata3) {
 
     if ($cgi->param('save_general')) {
         if ($new_broadcast_ip && $new_port) {
-            $config{'General'}{'BROADCAST_IP'}=$new_broadcast_ip;
-            $config{'General'}{'PORT'}=$port;
+            $config->param("General.BROADCAST_IP",$new_broadcast_ip);
+            $config->param("General.PORT",$port);
             # Save the updated configuration
-            write_config($cfg, \%config);
-            
+            #write_config($cfg, \%config);
+            $config->save;
+
             $template->param(BROADCAST_IP => $new_broadcast_ip);
             $template->param(PORT => $new_port);
             my $message = "$L{'SETTINGS.LABEL_GENERAL_SETTINGS_SAVED'}";
@@ -298,19 +310,31 @@ exit;
 
 }
 
+# Refactored device_loop function using Config::Simple
 sub device_loop() {
-
+    
+    # Create an array to store device details
     my @device_loop;
-    # Read current config values
-    foreach my $device (grep { $_ ne 'General' } keys %config) {
-        push @device_loop, {
-        DEVICE_NAME => $device,
-        DEVICE_SELECTED => ($cgi->param('device') && $cgi->param('device') eq $device) ? 'selected' : ''
-           };
-        }
-    $template->param(DEVICES => \@device_loop);
 
+    # Iterate over sections, ignoring 'General'
+
+    foreach my $device ($config->param()) {
+               
+        next if $device =~ /General/; # Skip the General section
+        
+        # Split the device string on the dot and take the first part
+        my ($device_name) = split(/\./, $device);
+        
+        push @device_loop, {
+            DEVICE_NAME     => $device_name,
+            DEVICE_SELECTED => ($cgi->param('device') && $cgi->param('device') eq $device_name) ? 'selected' : ''
+        };
+    }
+
+    # Set the template parameters with the devices array
+    $template->param(DEVICES => \@device_loop);
 }
+
 sub error
 {
 	$template->param( "ERROR", 1);
@@ -321,41 +345,20 @@ sub error
 
 	exit;
 }
-# Read configuration
-sub read_config {
-    my ($filename) = @_;
-    open my $fh, '<', $filename or die "Cannot open configuration file: $!";
-    my %config;
-    my $current_section;
-    while (my $line = <$fh>) {
-        chomp $line;
-        $line =~ s/^\s+|\s+$//g; # Trim spaces
-        next if $line eq "" || $line =~ /^#/; # Skip empty lines and comments
-        if ($line =~ /^\[(.*)\]$/) {
-            $current_section = $1;
-            next;
-        }
-        if ($line =~ /^(.*?)\s*=\s*(.*)$/) {
-            $config{$current_section}{$1} = $2;
+
+# Function to delete a block (section) from the configuration file
+sub delete_block {
+    my ($block_to_delete) = @_;
+
+     # Iterate over all keys in the configuration
+    foreach my $key ($config->param()) {
+        # If the key belongs to the block we want to delete
+        if ($key =~ /^$block_to_delete\./) {
+            # Delete the key from the config
+            $config->delete($key);
         }
     }
-    close $fh;
-    return %config;
+
+    # Write the updated configuration back to the file
+    $config->write() or die $config->error();
 }
-
-# Write configuration (used when updating/adding devices)
-sub write_config {
-    my ($filename, $config) = @_;
-    open my $fh, '>', $filename or die "Cannot open configuration file: $!";
-    print $fh "[General]\n";
-    print $fh "BROADCAST_IP = $config->{'General'}{'BROADCAST_IP'}\n";
-    print $fh "PORT = $config->{'General'}{'PORT'}\n";
-    for my $device (keys %$config) {
-        next if $device eq 'General'; # Skip the General section
-        print $fh "[$device]\n";
-        print $fh "MAC_ADDRESS = $config->{$device}{'MAC_ADDRESS'}\n";
-    }
-    close $fh;
-}
-
-

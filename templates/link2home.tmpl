@@ -101,8 +101,8 @@
                 <div class="ui-field-contain">
                     <label><TMPL_VAR SETTINGS.LABEL_SELECT_STATE></label>
                     <select name="state">
-                        <option value="on" <tmpl_if name='STATE_ON_SELECTED'>selected</tmpl_if>>ON</option>
-                        <option value="off" <tmpl_if name='STATE_OFF_SELECTED'>selected</tmpl_if>>OFF</option>
+                        <option value="on" <tmpl_if name='STATE_ON_SELECTED'>selected</tmpl_if>><TMPL_VAR SETTINGS.LABEL_ON></option>
+                        <option value="off" <tmpl_if name='STATE_OFF_SELECTED'>selected</tmpl_if>><TMPL_VAR SETTINGS.LABEL_OFF></option>
                     </select>
                 </div>
                 <center>
