@@ -108,9 +108,6 @@ sub form_print
 
     $navbar{3}{Name} = "$L{'SETTINGS.LABEL_RELAY_CONTROL'}";
     $navbar{3}{URL} = 'index.cgi?form=3';
-    
-    # Set header for our side
-    my $version = LoxBerry::System::pluginversion();
 
     # Populate the device dropdown in the form
     &device_loop();
